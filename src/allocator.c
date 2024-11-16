@@ -53,7 +53,7 @@ void mm_init() {
 block_t *mm_split(block_t *blk, size_t size) {
     block_t *new_blk = (block_t*)((uint8_t*)blk + sizeof(block_t) + size);
     size_t old_size = BLK_GET_SIZE(blk);
-    new_blk->next = NULL;
+    new_blk->next = blk->next;
     new_blk->prev = blk;
     new_blk->size = (old_size - size - sizeof(block_t)) << 1;
     blk->next = new_blk;
