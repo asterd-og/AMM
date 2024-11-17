@@ -62,6 +62,10 @@ block_t *mm_split(block_t *blk, size_t size) {
 }
 
 void *mm_alloc(size_t size) {
+    if (size % 0x10) {
+        size -= (size % 0x10);
+        size += 0x10;
+    }
     // Search a region with enough free size
     region_t *region;
     bool found = false;
@@ -81,8 +85,8 @@ void *mm_alloc(size_t size) {
     }
 
     block_t *blk = (block_t*)region->data_area;
-    while (blk->next && !(blk->size & FREE_BIT)) {
-        if (BLK_GET_SIZE(blk) >= size)
+    while (blk && !(blk->size & FREE_BIT)) {
+        if (BLK_GET_SIZE(blk) >= size && (blk->size & FREE_BIT))
             break;
         blk = blk->next; // We don't do any additional checks here
         // because we're sure we found a region big enough.
