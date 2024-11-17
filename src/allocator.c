@@ -105,12 +105,13 @@ void *mm_alloc(size_t size) {
 }
 
 // Merge block with the next one.
-block_t* mm_merge(block_t *blk) {
+block_t* mm_merge(block_t *blk, region_t *region) {
     size_t new_size = (BLK_GET_SIZE(blk) + BLK_GET_SIZE(blk->next) + sizeof(block_t));
     blk->size = new_size << 1;
     blk->next = blk->next->next;
     if (blk->next) blk->next->next->prev = blk;
     memset((uint8_t*)blk + sizeof(block_t), 0, new_size);
+    region->free_size += BLK_GET_SIZE(blk) + sizeof(block_t);
     return blk;
 }
 
@@ -120,11 +121,10 @@ void mm_free(void *ptr) {
 
     // Find neighboring free blocks and merge them if we find them
     while (blk->next && (blk->next->size & FREE_BIT) == 1)
-        mm_merge(blk);
+        mm_merge(blk, region);
     while (blk->prev && (blk->prev->size & FREE_BIT) == 1)
-        blk = mm_merge(blk->prev);
+        blk = mm_merge(blk->prev, region);
     blk->size |= FREE_BIT;
-    region->free_size += BLK_GET_SIZE(blk);
 }
 
 void mm_print() {
@@ -139,7 +139,7 @@ void mm_print() {
             region_size += BLK_GET_SIZE(blk) + sizeof(block_t);
             blk = blk->next;
         }
-        printf(" Region size: %ld | 0x%lx\n", region_size, region_size);
+        printf(" Region size: %ld | 0x%lx\n Region free size: %ld | 0x%lx\n", region_size, region_size, region->free_size, region->free_size);
     }
 }
 
