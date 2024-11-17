@@ -95,6 +95,7 @@ void *mm_alloc(size_t size) {
     if (BLK_GET_SIZE(blk) > size) {
         blk = mm_split(blk, size);
         blk->next->size |= FREE_BIT;
+        region->free_size -= sizeof(block_t);
     }
     region->free_size -= size;
     blk->region_addr = (uint8_t*)region;
