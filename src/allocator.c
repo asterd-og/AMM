@@ -107,11 +107,12 @@ void *mm_alloc(size_t size) {
 // Merge block with the next one.
 block_t* mm_merge(block_t *blk, region_t *region) {
     size_t new_size = (BLK_GET_SIZE(blk) + BLK_GET_SIZE(blk->next) + sizeof(block_t));
+    size_t freed_size = BLK_GET_SIZE(blk) + sizeof(block_t);
     blk->size = new_size << 1;
     blk->next = blk->next->next;
     if (blk->next) blk->next->next->prev = blk;
     memset((uint8_t*)blk + sizeof(block_t), 0, new_size);
-    region->free_size += BLK_GET_SIZE(blk) + sizeof(block_t);
+    region->free_size += freed_size;
     return blk;
 }
 
