@@ -110,7 +110,7 @@ block_t* mm_merge(block_t *blk, region_t *region) {
     size_t freed_size = BLK_GET_SIZE(blk) + sizeof(block_t);
     blk->size = new_size << 1;
     blk->next = blk->next->next;
-    if (blk->next) blk->next->next->prev = blk;
+    if (blk->next) blk->next->prev = blk;
     memset((uint8_t*)blk + sizeof(block_t), 0, new_size);
     region->free_size += freed_size;
     return blk;
